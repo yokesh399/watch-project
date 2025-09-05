@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <div class="logo">
+    <img src="logo.jpg" alt="Logo" class="navbar-logo" >
+    <span>TimeAura</span>
+  </div>
+    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <link rel="logo">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+
+    .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  color: gold;
+}
+
+.navbar-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid gold;
+}
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #222;
+      color: white;
+    }
+    button {
+      padding: 5px 10px;
+      margin: 2px;
+      background-color: crimson;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #close-btn {
+      background-color: gray;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Admin Panel - All Orders</h2>
+  <div id="orders-table"></div>
+  <button id="close-btn" onclick="window.close()">Close</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

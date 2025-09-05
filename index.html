@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title> AuraTimes- Premium Watches</title>
+  <link rel="stylesheet" href="watchstyle.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9D5HUEng-7WuqbqX5oNl_sLRS1AYaTJU&libraries=places"></script>
+</head>
+<body>
+
+<!-- NAVIGATION BAR -->
+<header>
+  <div class="logo">
+    <img src="logo.jpg" alt="Logo" class="navbar-logo">
+    <span>AuraTimes</span>
+    <div class="menu-toggle">☰ Menu</div>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#popular-section">Watches</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#" onclick="openCart()">View Cart 🛒</a></li>
+      <li><a href="javascript:void(0)" onclick="viewOrders()">View Order</a></li>
+      <li><a href="javascript:void(0)" onclick="showLoginPopup()">Login / Sign Up</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Cart Overlay (unchanged) -->
+<div id="cart-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+  background: rgba(0,0,0,0.5); z-index:1000; overflow-y:auto; padding: 60px 20px; box-sizing: border-box;">
+
+  <div id="cart-popup" style="background:white; padding:30px 20px; border-radius:10px; 
+    box-shadow:0 0 15px rgba(0,0,0,0.3); max-width:700px; width:100%; margin:auto;">
+
+    <h2 style="text-align:center; margin-bottom: 20px;">🛍️ Your Cart</h2>
+    
+    <div id="cart-container" style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-bottom: 20px;"></div>
+
+    <div style="text-align:center;">
+      <button onclick="placeOrder()" style="background:green; color:white; padding:12px 24px; border:none; border-radius:5px; font-size:16px; margin-right:10px;">Place Order</button>
+      <button onclick="closeCart()" style="background:red; color:white; padding:12px 24px; border:none; border-radius:5px; font-size:16px;">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Order View Popup (unchanged) -->
+<div id="order-popup" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
+ background:white; padding:20px; border-radius:10px; box-shadow:0 0 15px rgba(0,0,0,0.3); z-index:999; max-width:90%; max-height:80%; overflow-y:auto;">
+  <h2 style="text-align:center; color:gold;"><br>Your Order Details</h2>
+  <div id="order-container" style="margin-top:15px;"></div>
+  <button onclick="closeOrderPopup()" style="margin-top:15px; background:red; color:white; padding:8px 16px; border:none; border-radius:5px;">Close</button>
+</div>
+
+<!-- Login / Signup Popup -->
+<!-- Login / Signup Popup -->
+<div id="login-popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+background: rgba(0,0,0,0.6); z-index:1002; display:flex; justify-content:center; align-items:center;">
+  <div style="background:white; padding:30px; border-radius:10px; width:90%; max-width:400px; text-align:center;">
+    <h3>🔐 Login / Sign Up</h3>
+    <input type="email" id="loginEmail" placeholder="Email" style="width:100%; padding:10px; margin-top:10px;"><br>
+    <input type="password" id="loginPassword" placeholder="Password" style="width:100%; padding:10px; margin-top:10px;">
+<input type="checkbox" id="showPassword" style="margin-top:10px;"> Show Password
+
+    <button onclick="login()">Login</button>
+    <button onclick="signUp()">Sign Up</button>
+    <button onclick="guestLogin()">Continue as Guest</button>
+    
+  </div>
+</div>
+
+<script>
+// Show login popup automatically if no user is logged in
+document.addEventListener("DOMContentLoaded", () => {
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      // No user logged in, show login popup
+      showLoginPopup();
+    } else {
+      // User is logged in, load their cart
+      loadCart(user.uid);
+    }
+  });
+});
+
+// Function to show login popup
+function showLoginPopup() {
+  document.getElementById("login-popup").style.display = "flex";
+}
+
+// Function to close login popup
+function closeLoginPopup() {
+  document.getElementById("login-popup").style.display = "none";
+}
+</script>
+
+<!-- Navbar button example -->
+<li><a href="javascript:void(0)" onclick="showLoginPopup()">Login / Sign Up</a></li>
+
+
+
+
+
+
+<!-- Scrolling Slogan Banner (unchanged) -->
+<div class="scroll-slogan">
+  <p>⏱️ Discover Timeless Elegance with TimeAura — Luxury Watches for Every Style! ⌚</p>
+</div>
+
+<!-- IMAGE SLIDER + HERO TEXT (unchanged) -->
+<section class="slider" style="position: relative; margin-top: 70px;">
+  <div class="slides">
+    <img src="watch.jpg" class="slide" style="display:block; width: 100%; height: 700px; object-fit: cover;">
+    <img src="watch1.jpg" class="slide" style="width: 100%; height: 700px; object-fit: cover;">
+    <img src="watch2.jog.jpg" class="slide" style="width: 100%; height: 700px; object-fit: cover;">
+    <img src="watch8.png" class="slide" style="width: 100%; height: 700px; object-fit: cover;">
+    <img src="watch5.jpg" class="slide" style="width: 100%; height: 700px; object-fit: cover;">
+    <img src="watch4.jpg" class="slide" style="width: 100%; height: 700px; object-fit: cover;">
+  </div>
+
+  <!-- Hero Text scrolling word -->
+  <div class="hero-text">
+    <h1>Luxury That Defines You</h1>
+    <p>Explore premium watches built for timeless elegance.</p>
+    <a href="#popular-section" class="hero-btn">Shop Now</a>
+  </div>
+
+  <!-- Why Us merged below hero -->
+  <div class="home-why-us">
+    <div class="features">
+      <div class="feature-box">🕰️ 100% Authentic</div>
+      <div class="feature-box">🚚 Free Shipping</div>
+      <div class="feature-box">💰 7-Day Return</div>
+      <div class="feature-box">🔒 Secure Payment</div>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR WATCHES (unchanged) -->
+<section id="popular-section">
+  <div class="popular-header">
+    <h2>Popular Watches</h2>
+    <div class="filter-buttons">
+      <button onclick="filterWatches('all')">All</button>
+      <button onclick="filterWatches('men')">Men</button>
+      <button onclick="filterWatches('women')">Women</button>
+      <button onclick="filterWatches('couple')">Couples</button>
+    </div>
+  </div>
+  <div id="popular-container"></div>
+</section>
+
+<!-- CONTACT (unchanged) -->
+<section id="contact">
+  <div class="contact-container">
+    <div class="contact-header">
+      <img src="logo.jpg" alt="TimeAura Logo" class="contact-logo">
+      <h2>AuraTimes Watches</h2>
+      <p>Premium Timepieces for Every Style</p>
+    </div>
+
+    <div class="contact-details">
+      <div class="contact-box">
+        <h4>Email</h4>
+        <p>support@shobaselvara.com</p>
+      </div>
+      <div class="contact-box">
+        <h4>Phone</h4>
+        <p>+91 98765 43210</p>
+      </div>
+      <div class="contact-box">
+        <h4>Address</h4>
+        <p>123, Anna Nagar, Chennai, Tamil Nadu</p>
+      </div>
+    </div>
+
+     <div class="map-container">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.458773004662!2d80.23283721533444!3d13.08268029078947!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a5265eaf9a1e2c5%3A0x4d63c47e65d3ae0a!2sChennai%20Central!5e0!3m2!1sen!2sin!4v1691575427481!5m2!1sen!2sin"
+        width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- Mouse Cursor Follower (unchanged) -->
+<div class="cursor-follower"></div>
+
+<!-- Toast Message (unchanged) -->
+<div id="toast" style="position: fixed; bottom: 30px; right: 30px; background-color: black; color: gold;
+padding: 12px 20px; border-radius: 5px; display: none; font-weight: bold; z-index: 9999;">
+  Item added to cart!
+</div>
+
+<!-- Place Order Popup (unchanged) -->
+<div id="order-form-popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+background: rgba(0,0,0,0.6); z-index:1001;  justify-content: center; align-items: center;">
+  <div style="background:white; padding:30px 25px; border-radius:10px; width:90%; max-width:400px; text-align:center;">
+    <h3>📝 Confirm Your Order</h3>
+    <input type="text" id="customer-name" placeholder="Your Name" style="width:100%; padding:10px; margin-top:10px;"><br>
+    <input type="number" id="customer-phone" placeholder="Phone Number" style="width:100%; padding:10px; margin-top:10px;"><br>
+    <select id="payment-method" style="width:100%; padding:10px; margin-top:10px;">
+      <option value="Select">Select Payment Method</option>
+      <option value="Cash on Delivery">Cash on Delivery</option>
+      <option value="GPay">GPay</option>
+    </select><br><br>
+
+    <!-- New Location Field -->
+    <input type="text" id="customer-location" placeholder="Paste Google Maps link here" style="width:100%; padding:10px; margin-top:10px;">
+    <a href="https://www.google.com/maps" target="_blank" style="display:block; margin-top:5px; color:blue;">🔍 Search your location on Google Maps</a>
+
+    <button type="button" onclick="submitOrder()" style="background:green; color:white; padding:10px 20px; border:none; border-radius:5px;">
+  Confirm Order
+</button>
+    <button onclick="closeOrderForm()" style="background:red; color:white; padding:10px 20px; border:none; border-radius:5px; margin-left:10px;">Cancel</button>
+  </div>
+</div>
+
+<script src="wathchscript.js"></script>
+</body>
+</html>
