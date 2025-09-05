@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order with Location</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    form {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Place Your Order</h2>
+  
+  <form id="orderForm">
+    <input type="text" id="name" placeholder="Enter Name" required><br><br>
+    <input type="text" id="phone" placeholder="Enter Phone" required><br><br>
+    <input type="text" id="payment" placeholder="Payment Method" required><br><br>
+    
+    <button type="button" onclick="openMap()">📍 Select Location</button><br><br>
+    
+    <div id="map" style="display:none;"></div>
+    <p id="selectedLocation"></p>
+
+    <button type="submit">Place Order</button>
+  </form>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+  <script>
+    // ✅ Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let map, marker, chosenLocation = null;
+
+    function openMap() {
+      document.getElementById("map").style.display = "block";
+
+      if (!map) {
+        map = L.map('map').setView([13.0827, 80.2707], 13); // Chennai default
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // ✅ Add search bar
+        L.Control.geocoder().addTo(map);
+
+        // On map click
+        map.on('click', function (e) {
+          let lat = e.latlng.lat;
+          let lng = e.latlng.lng;
+
+          if (marker) map.removeLayer(marker);
+          marker = L.marker([lat, lng]).addTo(map);
+
+          chosenLocation = { lat, lng };
+          document.getElementById("selectedLocation").innerText =
+            `📍 Selected Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        });
+      }
+    }
+
+    // ✅ Save Order
+    document.getElementById("orderForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const payment = document.getElementById("payment").value;
+
+      if (!chosenLocation) {
+        alert("Please select a location before placing order!");
+        return;
+      }
+
+      const orderData = {
+        name,
+        phone,
+        payment,
+        location: chosenLocation,
+        timestamp: Date.now()
+      };
+
+      firebase.database().ref("orders").push(orderData)
+        .then(() => {
+          alert("✅ Order placed successfully!");
+          document.getElementById("orderForm").reset();
+          document.getElementById("map").style.display = "none";
+          document.getElementById("selectedLocation").innerText = "";
+          chosenLocation = null;
+        })
+        .catch(err => console.error("Error:", err));
+    });
+  </script>
+</body>
+</html>
